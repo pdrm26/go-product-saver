@@ -2,7 +2,7 @@ FROM golang:1.23-alpine AS builder
 
 WORKDIR /app
 
-ARG BINARY_NAME=go-product-saver
+ARG BINARY_NAME=go-post-saver
 
 COPY go.mod go.sum ./
 # RUN go get

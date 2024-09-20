@@ -16,7 +16,7 @@ import (
 var (
 	server *gin.Engine
 
-	ProductController      controllers.ProductController
+	ProductController      controllers.PostController
 	ProductRouteController routes.ProductRouteController
 )
 
@@ -29,10 +29,10 @@ func init() {
 	initializers.ConnectDB(&config)
 
 	initializers.DB.Exec("CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\"")
-	initializers.DB.AutoMigrate(&models.Product{}, &models.Brand{}, &models.Category{})
+	initializers.DB.AutoMigrate(&models.Post{})
 	fmt.Println("👍 Migration complete")
 
-	ProductController = controllers.NewProductController(initializers.DB)
+	ProductController = controllers.NewPostController(initializers.DB)
 	ProductRouteController = routes.NewRouteProductController(ProductController)
 
 	server = gin.Default()
