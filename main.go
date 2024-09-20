@@ -1,8 +1,12 @@
 package main
 
 import (
+	"fmt"
 	"log"
+	"my-module/controllers"
 	"my-module/initializers"
+	"my-module/models"
+	"my-module/routes"
 	"net/http"
 
 	"github.com/gin-contrib/cors"
@@ -11,8 +15,10 @@ import (
 
 var (
 	server *gin.Engine
-)
 
+	ProductController      controllers.ProductController
+	ProductRouteController routes.ProductRouteController
+)
 
 func init() {
 	config, err := initializers.LoadConfig(".")
@@ -22,14 +28,12 @@ func init() {
 
 	initializers.ConnectDB(&config)
 
-//	AuthController = controllers.NewAuthController(initializers.DB)
-	//AuthRouteController = routes.NewAuthRouteController(AuthController)
+	initializers.DB.Exec("CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\"")
+	initializers.DB.AutoMigrate(&models.Product{}, &models.Brand{}, &models.Category{})
+	fmt.Println("👍 Migration complete")
 
-	//UserController = controllers.NewUserController(initializers.DB)
-	//UserRouteController = routes.NewRouteUserController(UserController)
-
-	//PostController = controllers.NewPostController(initializers.DB)
-	//PostRouteController = routes.NewRoutePostController(PostController)
+	ProductController = controllers.NewProductController(initializers.DB)
+	ProductRouteController = routes.NewRouteProductController(ProductController)
 
 	server = gin.Default()
 
@@ -52,9 +56,7 @@ func main() {
 		ctx.JSON(http.StatusOK, gin.H{"status": "success", "message": message})
 	})
 
-//	AuthRouteController.AuthRoute(router)
-	//UserRouteController.UserRoute(router)
-	//PostRouteController.PostRoute(router)
+	ProductRouteController.ProductRoute(router)
 	log.Fatal(server.Run(":" + config.ServerPort))
 
 }
