@@ -1,75 +1,63 @@
 package main
 
 import (
-	"database/sql"
-	"encoding/json"
 	"log"
-	"my-module/models"
-	"my-module/postgres"
-	"my-module/server"
+	"my-module/initializers"
 	"net/http"
+
+	"github.com/gin-contrib/cors"
+	"github.com/gin-gonic/gin"
+	//"my-module/models"
+	//"my-module/server"
+	//"net/http"
 )
 
-type dbHandler struct {
-	db *sql.DB
-}
+var (
+	server *gin.Engine
+)
 
-func (h *dbHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	switch r.Method {
-	case "GET":
-		rows, err := postgres.GetRows(h.db)
-		if err != nil {
-			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-			log.Printf("HandleGet error: %v", err)
-			return
-		}
-		var products []models.Product
-		for rows.Next() {
-			var p models.Product
-			if err := rows.Scan(&p.ID, &p.Product, &p.Price, &p.CreatedAt); err != nil {
-				http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-				log.Printf("Row scan error: %v", err)
-				return
-			}
 
-			products = append(products, p)
-		}
-
-		if err := rows.Err(); err != nil {
-			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-			log.Printf("Row iteration error: %v", err)
-			return
-		}
-
-		json.NewEncoder(w).Encode(products)
-	case "POST":
-		var product models.Product
-		if err := json.NewDecoder(r.Body).Decode(&product); err != nil {
-			http.Error(w, err.Error(), http.StatusBadRequest)
-			return
-		}
-		postgres.InsertTable(h.db, product)
-		w.WriteHeader(http.StatusCreated)
-	default:
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-	}
-}
-
-func main() {
-
-	db, err := postgres.ConnectDB()
+func init() {
+	config, err := initializers.LoadConfig(".")
 	if err != nil {
-		log.Fatal("Failed to connect to database:", err)
+		log.Fatal("🚀 Could not load environment variables", err)
 	}
 
-	defer db.Close() // Close the connection when the program ends
+	initializers.ConnectDB(&config)
 
-	postgres.CreateTable(db)
+//	AuthController = controllers.NewAuthController(initializers.DB)
+	//AuthRouteController = routes.NewAuthRouteController(AuthController)
 
-	handler := &dbHandler{db: db}
+	//UserController = controllers.NewUserController(initializers.DB)
+	//UserRouteController = routes.NewRouteUserController(UserController)
 
-	http.Handle("/", handler)
-	server.Connect()
+	//PostController = controllers.NewPostController(initializers.DB)
+	//PostRouteController = routes.NewRoutePostController(PostController)
+
+	server = gin.Default()
+
+}
+func main() {
+	config, err := initializers.LoadConfig(".")
+	if err != nil {
+		log.Fatal("🚀 Could not load environment variables", err)
+	}
+
+	corsConfig := cors.DefaultConfig()
+	corsConfig.AllowOrigins = []string{"http://localhost:8000", config.ClientOrigin}
+	corsConfig.AllowCredentials = true
+
+	server.Use(cors.New(corsConfig))
+
+	router := server.Group("/api")
+	router.GET("/healthChecker", func(ctx *gin.Context) {
+		message := "Welcome to Golang with Gorm and Postgres"
+		ctx.JSON(http.StatusOK, gin.H{"status": "success", "message": message})
+	})
+
+//	AuthRouteController.AuthRoute(router)
+	//UserRouteController.UserRoute(router)
+	//PostRouteController.PostRoute(router)
+	log.Fatal(server.Run(":" + config.ServerPort))
 
 }
