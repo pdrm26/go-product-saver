@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"log"
+	"my-module/models"
 	"my-module/postgres"
 	"my-module/server"
 	"net/http"
@@ -23,9 +24,9 @@ func (h *dbHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			log.Printf("HandleGet error: %v", err)
 			return
 		}
-		var products []postgres.Product
+		var products []models.Product
 		for rows.Next() {
-			var p postgres.Product
+			var p models.Product
 			if err := rows.Scan(&p.ID, &p.Product, &p.Price, &p.CreatedAt); err != nil {
 				http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 				log.Printf("Row scan error: %v", err)
@@ -43,7 +44,7 @@ func (h *dbHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 		json.NewEncoder(w).Encode(products)
 	case "POST":
-		var product postgres.Product
+		var product models.Product
 		if err := json.NewDecoder(r.Body).Decode(&product); err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return

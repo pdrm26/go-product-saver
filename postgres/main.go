@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
-	"time"
+	"my-module/models"
 
 	_ "github.com/lib/pq"
 )
@@ -16,13 +16,6 @@ const (
 	password = "password"
 	dbname   = "mydb"
 )
-
-type Product struct {
-	ID        int       `json:"id"`
-	Product   string    `json:"product"`
-	Price     float64   `json:"price"`
-	CreatedAt time.Time `json:"created_at"`
-}
 
 func ConnectDB() (*sql.DB, error) {
 	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s "+
@@ -58,7 +51,7 @@ func CreateTable(db *sql.DB) {
 
 }
 
-func InsertTable(db *sql.DB, p Product) {
+func InsertTable(db *sql.DB, p models.Product) {
 
 	// SQL statement for inserting a product
 	sqlStatement := `
