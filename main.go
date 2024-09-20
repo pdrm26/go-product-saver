@@ -7,9 +7,6 @@ import (
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
-	//"my-module/models"
-	//"my-module/server"
-	//"net/http"
 )
 
 var (
