@@ -5,15 +5,15 @@ import (
 	"my-module/controllers"
 )
 
-type ProductRouteController struct {
+type PostRouteController struct {
 	postController controllers.PostController
 }
 
-func NewRouteProductController(productController controllers.PostController) ProductRouteController {
-	return ProductRouteController{productController}
+func NewRoutePostController(postController controllers.PostController) PostRouteController {
+	return PostRouteController{postController}
 }
 
-func (pc *ProductRouteController) ProductRoute(rg *gin.RouterGroup) {
+func (pc *PostRouteController) PostRoute(rg *gin.RouterGroup) {
 	router := rg.Group("posts")
 	//middleware
 	router.GET("/", pc.postController.FindPosts)

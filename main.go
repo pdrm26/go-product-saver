@@ -19,8 +19,8 @@ var (
 	AuthController      controllers.AuthController
 	AuthRouteController routes.AuthRouteController
 
-	ProductController      controllers.PostController
-	ProductRouteController routes.ProductRouteController
+	PostController      controllers.PostController
+	PostRouteController routes.PostRouteController
 
 	UserController      controllers.UserController
 	UserRouteController routes.UserRouteController
@@ -41,8 +41,8 @@ func init() {
 	AuthController = controllers.NewAuthController(initializers.DB)
 	AuthRouteController = routes.NewAuthRouteController(AuthController)
 
-	ProductController = controllers.NewPostController(initializers.DB)
-	ProductRouteController = routes.NewRouteProductController(ProductController)
+	PostController = controllers.NewPostController(initializers.DB)
+	PostRouteController = routes.NewRoutePostController(PostController)
 
 	UserController = controllers.NewUserController(initializers.DB)
 	UserRouteController = routes.NewRouteUserController(UserController)
@@ -69,7 +69,7 @@ func main() {
 	})
 
 	AuthRouteController.AuthRoute(router)
-	ProductRouteController.ProductRoute(router)
+	PostRouteController.PostRoute(router)
 	UserRouteController.UserRoute(router)
 
 	log.Fatal(server.Run(":" + config.ServerPort))
