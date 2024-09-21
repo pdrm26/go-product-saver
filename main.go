@@ -16,8 +16,14 @@ import (
 var (
 	server *gin.Engine
 
+	AuthController      controllers.AuthController
+	AuthRouteController routes.AuthRouteController
+
 	ProductController      controllers.PostController
 	ProductRouteController routes.ProductRouteController
+
+	UserController      controllers.UserController
+	UserRouteController routes.UserRouteController
 )
 
 func init() {
@@ -29,11 +35,17 @@ func init() {
 	initializers.ConnectDB(&config)
 
 	initializers.DB.Exec("CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\"")
-	initializers.DB.AutoMigrate(&models.Post{})
+	initializers.DB.AutoMigrate(&models.Post{}, &models.User{})
 	fmt.Println("👍 Migration complete")
+
+	AuthController = controllers.NewAuthController(initializers.DB)
+	AuthRouteController = routes.NewAuthRouteController(AuthController)
 
 	ProductController = controllers.NewPostController(initializers.DB)
 	ProductRouteController = routes.NewRouteProductController(ProductController)
+
+	UserController = controllers.NewUserController(initializers.DB)
+	UserRouteController = routes.NewRouteUserController(UserController)
 
 	server = gin.Default()
 
@@ -56,7 +68,10 @@ func main() {
 		ctx.JSON(http.StatusOK, gin.H{"status": "success", "message": message})
 	})
 
+	AuthRouteController.AuthRoute(router)
 	ProductRouteController.ProductRoute(router)
+	UserRouteController.UserRoute(router)
+
 	log.Fatal(server.Run(":" + config.ServerPort))
 
 }
